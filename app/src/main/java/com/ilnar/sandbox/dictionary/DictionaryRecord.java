@@ -19,4 +19,14 @@ public class DictionaryRecord {
     public String getTranslation() {
         return translation;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof DictionaryRecord && word.equals(((DictionaryRecord) o).word);
+    }
+
+    @Override
+    public int hashCode() {
+        return word.hashCode();
+    }
 }
