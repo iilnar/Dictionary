@@ -1,5 +1,7 @@
 package com.ilnar.sandbox;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,8 +20,8 @@ import java.util.logging.Logger;
  * Created by ilnar on 29.05.16.
  */
 public class TranslationActivity extends AppCompatActivity {
-    private TextView wordView;
     private TextView translationView;
+    private final static String LOG_TAG = TranslationActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,24 +36,27 @@ public class TranslationActivity extends AppCompatActivity {
         if (translation == null) {
             translation = "No translation";
         }
-        Log.d("Translation", word);
-        Log.d("Translation", translation);
-        wordView = (TextView)findViewById(R.id.word);
+        Log.d(LOG_TAG, word);
+        Log.d(LOG_TAG, translation);
         translationView = (TextView)findViewById(R.id.translation);
-        if (wordView != null) {
-            wordView.setText(word);
-        }
         if (translationView != null) {
-            translationView.setText(Html.fromHtml(translation.replace("\n", "<br>")));
+            translationView.setText(Html.fromHtml(String.format("<h1>%s</h1><br>%s", word, translation.replace("\n", "<br>"))));
+//            translationView.setOnTouchListener(new View.OnTouchListener() {
+//                @Override
+//                public boolean onTouch(View v, MotionEvent event) {
+//                    Log.d("touch", "touch");
+//                    return false;
+//                }
+//            });
+            translationView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager clipboardManager = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                    clipboardManager.setPrimaryClip(ClipData.newPlainText(LOG_TAG, translationView.getText()));
+                    Log.d(LOG_TAG, "copied");
+                }
+            });
         }
-        View v = findViewById(R.id.translation_view);
-        v.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d("touch", "touch");
-                return false;
-            }
-        });
     }
 
     @Override

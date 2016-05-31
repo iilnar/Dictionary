@@ -1,42 +1,35 @@
 package com.ilnar.sandbox;
 
-import android.app.DownloadManager;
 import android.app.SearchManager;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SearchRecentSuggestionsProvider;
-import android.database.Cursor;
-import android.provider.SearchRecentSuggestions;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.util.Log;
-import android.util.LruCache;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 
+import com.ilnar.sandbox.database.RecentQueryDBHelper;
 import com.ilnar.sandbox.dictionary.Dictionary;
 import com.ilnar.sandbox.dictionary.DictionaryRecord;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private DictionaryAdapter dictionaryAdapter;
     private List<DictionaryRecord> list;
     private Dictionary dictionary;
-    private LruCache<DictionaryRecord, DictionaryRecord> lruCache;
+    private RecentQueryDBHelper recentQuery;
     private SearchView searchView;
     private CharSequence query;
 
@@ -44,13 +37,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Log.d(LOG_TAG, "onCreate");
         setContentView(R.layout.activity_main);
 //        handleIntent(getIntent());
-        lruCache = new LruCache<>(4);
+        recentQuery = RecentQueryDBHelper.getInstance(getApplicationContext());
         dictionary = new Dictionary();
         list = new ArrayList<>();
-        list.addAll(dictionary.getData());
 
         RecyclerView.LayoutManager layoutManager =  new LinearLayoutManager(getApplicationContext());
         dictionaryAdapter = new DictionaryAdapter(list);
@@ -68,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 bundle.putString("word", record.getWord());
                 bundle.putString("translation", record.getTranslation());
                 intent.putExtras(bundle);
-                lruCache.put(record, record);
+                recentQuery.saveRecentQuery(record);
                 startActivity(intent);
             }
 
@@ -77,10 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }));
-        super.onCreate(savedInstanceState);
-    }
-
-    void f() {
+        updateRecyclerView(null);
     }
 
     @Override
@@ -94,13 +84,19 @@ public class MainActivity extends AppCompatActivity {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             Log.d("handleIntent", query);
-            showSearch(query);
+            updateRecyclerView(query);
+        } else {
+            updateRecyclerView(searchView.getQuery().toString());
         }
     }
 
-    private void showSearch(String query) {
+    private void updateRecyclerView(String query) {
         list.clear();
-        list.addAll(dictionary.search(query));
+        if (TextUtils.isEmpty(query)) {
+            list.addAll(recentQuery.getRecentQueries());
+        } else {
+            list.addAll(dictionary.search(query));
+        }
         dictionaryAdapter.notifyDataSetChanged();
     }
 
@@ -126,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 Log.d("change", newText);
-                showSearch(newText);
+                updateRecyclerView(newText);
                 return false;
             }
         });
@@ -140,13 +136,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 Log.d(LOG_TAG, "collapse");
-                list.clear();
-                Map<DictionaryRecord, DictionaryRecord> snapshot = lruCache.snapshot();
-                for (Map.Entry<DictionaryRecord, DictionaryRecord> it : snapshot.entrySet()) {
-                    Log.d("LRU_CACHE", it.getKey().getWord());
-                    list.add(it.getKey());
-                }
-                dictionaryAdapter.notifyDataSetChanged();
+                updateRecyclerView(null);
                 return true;
             }
         });

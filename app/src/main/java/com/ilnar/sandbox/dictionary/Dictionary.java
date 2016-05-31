@@ -14,17 +14,17 @@ public class Dictionary {
     public Dictionary() {
         Log.d(Dictionary.class.getName(), "constructor called");
         data = new ArrayList<>();
-        data.add(new DictionaryRecord("aba", "caba"));
-        data.add(new DictionaryRecord("aa", "casadfba"));
-        data.add(new DictionaryRecord("aaba", "cadagsba"));
-        data.add(new DictionaryRecord("abfaa", "caa\ndfba"));
-        data.add(new DictionaryRecord("gsaqbfaa", "caadfba"));
-        data.add(new DictionaryRecord("saabfaa", "caa\nd\nfba"));
-        data.add(new DictionaryRecord("qabfaa", "caa\ndfba"));
-        data.add(new DictionaryRecord("qabfaa", "caa\ndfba"));
-        data.add(new DictionaryRecord("qabfaa", "caa\ndfba"));
-        data.add(new DictionaryRecord("qabfaa", "caa\ndfba"));
-        data.add(new DictionaryRecord("qabfaa", "caa\ndfba"));
+        data.add(new DictionaryRecord("one", "caba"));
+        data.add(new DictionaryRecord("two", "casadfba"));
+        data.add(new DictionaryRecord("three", "cadagsba"));
+        data.add(new DictionaryRecord("four", "caa\ndfba"));
+        data.add(new DictionaryRecord("five", "caadfba"));
+        data.add(new DictionaryRecord("six", "caa\nd\nfba"));
+        data.add(new DictionaryRecord("seven", "caa\ndfba"));
+        data.add(new DictionaryRecord("eight", "caa\ndfba"));
+        data.add(new DictionaryRecord("nine", "caa\ndfba"));
+        data.add(new DictionaryRecord("ten", "caa\ndfba"));
+        data.add(new DictionaryRecord("eleven", "caa\ndfba"));
     }
 
     public void addRecord(DictionaryRecord record) {
