@@ -1,9 +1,15 @@
 package com.ilnar.sandbox;
 
+import android.app.DownloadManager;
 import android.app.SearchManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SearchRecentSuggestionsProvider;
+import android.database.Cursor;
+import android.provider.SearchRecentSuggestions;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -17,37 +23,38 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.ilnar.sandbox.dictionary.Dictionary;
 import com.ilnar.sandbox.dictionary.DictionaryRecord;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private RecyclerView recyclerView;
     private DictionaryAdapter dictionaryAdapter;
-    private List<DictionaryRecord> list = new ArrayList<>();
-    private Dictionary dictionary = new Dictionary();
-    private LruCache<DictionaryRecord, DictionaryRecord> lruCache = new LruCache<>(4);
+    private List<DictionaryRecord> list;
+    private Dictionary dictionary;
+    private LruCache<DictionaryRecord, DictionaryRecord> lruCache;
+    private SearchView searchView;
+    private CharSequence query;
+
+    private static final String LOG_TAG = MainActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            Log.d("Create", "create");
-        } else {
-            Log.d("Create", "restore");
-        }
+        Log.d(LOG_TAG, "onCreate");
         setContentView(R.layout.activity_main);
-
+//        handleIntent(getIntent());
+        lruCache = new LruCache<>(4);
+        dictionary = new Dictionary();
+        list = new ArrayList<>();
         list.addAll(dictionary.getData());
 
         RecyclerView.LayoutManager layoutManager =  new LinearLayoutManager(getApplicationContext());
         dictionaryAdapter = new DictionaryAdapter(list);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(dictionaryAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -73,16 +80,36 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
     }
 
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//    }
+    void f() {
+    }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        Log.d(LOG_TAG + "handle", intent.getAction());
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            Log.d("handleIntent", query);
+            showSearch(query);
+        }
+    }
+
+    private void showSearch(String query) {
+        list.clear();
+        list.addAll(dictionary.search(query));
+        dictionaryAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        Log.d(LOG_TAG, "onCreateOptionsMenu");
         getMenuInflater().inflate(R.menu.search_menu, menu);
         MenuItem searchItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
         SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
         if (searchManager != null) {
@@ -99,26 +126,27 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 Log.d("change", newText);
-                list.clear();
-                list.addAll(dictionary.search(newText));
-                dictionaryAdapter.notifyDataSetChanged();
+                showSearch(newText);
                 return false;
             }
         });
         MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
+                Log.d(LOG_TAG, "expand");
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-//                list.clear();
-//                Map<DictionaryRecord, DictionaryRecord> snapshot = lruCache.snapshot();
-//                for (Map.Entry<DictionaryRecord, DictionaryRecord> it : snapshot.entrySet()) {
-//                    list.add(it.getKey());
-//                }
-//                dictionaryAdapter.notifyDataSetChanged();
+                Log.d(LOG_TAG, "collapse");
+                list.clear();
+                Map<DictionaryRecord, DictionaryRecord> snapshot = lruCache.snapshot();
+                for (Map.Entry<DictionaryRecord, DictionaryRecord> it : snapshot.entrySet()) {
+                    Log.d("LRU_CACHE", it.getKey().getWord());
+                    list.add(it.getKey());
+                }
+                dictionaryAdapter.notifyDataSetChanged();
                 return true;
             }
         });
