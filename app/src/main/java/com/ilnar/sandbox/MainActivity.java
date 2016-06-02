@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }));
-        updateRecyclerView(null);
+        handleIntent(getIntent());
     }
 
     @Override
@@ -85,9 +85,16 @@ public class MainActivity extends AppCompatActivity {
             String query = intent.getStringExtra(SearchManager.QUERY);
             Log.d("handleIntent", query);
             updateRecyclerView(query);
-        } else {
-            updateRecyclerView(searchView.getQuery().toString());
+            return;
         }
+        if (Intent.ACTION_SEND.equals(intent.getAction())) {
+            if (intent.getType().equals("text/plain")) {
+                query = intent.getStringExtra(Intent.EXTRA_TEXT);
+//                updateRecyclerView(intent.getStringExtra(Intent.EXTRA_TEXT));
+                return;
+            }
+        }
+        updateRecyclerView(null);
     }
 
     private void updateRecyclerView(String query) {
@@ -140,6 +147,10 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        if (!TextUtils.isEmpty(query)) {
+            searchItem.expandActionView();
+            searchView.setQuery(query, true);
+        }
         return true;
     }
 

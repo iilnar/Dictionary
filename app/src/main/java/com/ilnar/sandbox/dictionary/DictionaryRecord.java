@@ -3,7 +3,7 @@ package com.ilnar.sandbox.dictionary;
 /**
  * Created by ilnar on 29.05.16.
  */
-public class DictionaryRecord {
+public class DictionaryRecord implements Comparable<DictionaryRecord> {
     private final String word;
     private final String translation;
 
@@ -28,5 +28,10 @@ public class DictionaryRecord {
     @Override
     public int hashCode() {
         return word.hashCode();
+    }
+
+    @Override
+    public int compareTo(DictionaryRecord another) {
+        return word.compareTo(another.word);
     }
 }
