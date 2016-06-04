@@ -5,4 +5,7 @@
         android:icon="@android:drawable/ic_menu_share"
         app:showAsAction="ifRoom"
         android:title="Share" />
+    <item android:id="@+id/add_translation"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="Edit translation"/>
 </menu>

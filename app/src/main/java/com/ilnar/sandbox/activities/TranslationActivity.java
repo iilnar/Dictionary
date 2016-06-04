@@ -5,7 +5,6 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -21,13 +20,14 @@ import com.ilnar.sandbox.R;
  */
 public class TranslationActivity extends AppCompatActivity {
     private TextView translationView;
-    private ShareActionProvider shareActionProvider;
+    private String word;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.translation_layout);
         Bundle b = getIntent().getExtras();
-        String word = b.getString("word");
+        word = b.getString("word");
         String translation = b.getString("translation");
         if (word == null) {
             word = "No word";
@@ -70,6 +70,18 @@ public class TranslationActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        MenuItem editTranslation = menu.findItem(R.id.add_translation);
+        editTranslation.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(TranslationActivity.this, AddTranslationActivity.class);
+                intent.putExtra("word", word);
+                startActivity(intent);
+                return true;
+            }
+        });
+
         return true;
     }
 

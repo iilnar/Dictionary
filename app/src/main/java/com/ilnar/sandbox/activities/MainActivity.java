@@ -186,6 +186,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        MenuItem addTranslation = menu.findItem(R.id.add_translation);
+        addTranslation.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(MainActivity.this, AddTranslationActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        });
+
         return true;
     }
 
