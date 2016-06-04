@@ -1,4 +1,4 @@
-package com.ilnar.sandbox;
+package com.ilnar.sandbox.Util;
 
 import android.content.Context;
 import android.content.res.TypedArray;

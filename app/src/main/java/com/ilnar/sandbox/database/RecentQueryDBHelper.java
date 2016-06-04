@@ -23,9 +23,7 @@ import java.util.Locale;
 public class RecentQueryDBHelper extends SQLiteOpenHelper {
     private static final String DB_FILE_NAME = "recent_record.db";
 
-    private static final int DB_VERSION = 2;
-
-    private static final String LOG_TAG = RecentQueryDBHelper.class.getName();
+    private static final int DB_VERSION = 3;
 
     private static volatile RecentQueryDBHelper instance;
 
@@ -78,6 +76,12 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
         int wordId = c.getColumnIndexOrThrow(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_WORD);
         int translationId = c.getColumnIndexOrThrow(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_TRANSLATION);
         return new DictionaryRecord(c.getString(wordId), c.getString(translationId));
+    }
+
+    public void clearHistory() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL(RecentQueryContract.QueriesTable.DROP_TABLE);
+        onCreate(db);
     }
 
     public void saveRecentQuery(final DictionaryRecord query) {
@@ -135,5 +139,7 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
         }
         return result;
     }
+
+    private static final String LOG_TAG = RecentQueryDBHelper.class.getName();
 
 }

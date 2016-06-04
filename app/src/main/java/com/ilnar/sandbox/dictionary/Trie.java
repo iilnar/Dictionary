@@ -1,5 +1,7 @@
 package com.ilnar.sandbox.dictionary;
 
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -8,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +20,7 @@ import java.util.Map;
 /**
  * Created by ilnar on 01.06.16.
  */
-public class Trie {
+public class Trie extends Dictionary {
     private class Node {
         private HashMap<Character, Node> link;
         private DictionaryRecord record;
@@ -44,47 +47,47 @@ public class Trie {
             }
             return link.get(c);
         }
-
-        void write(DataOutputStream os) throws IOException {
-            os.writeBoolean(this.record != null);
-            if (this.record != null) {
-                os.writeUTF(this.record.getTranslation());
-            }
-            os.writeInt(link.size());
-            for (Map.Entry<Character, Node> entry : link.entrySet()) {
-                os.writeChar(entry.getKey());
-                entry.getValue().write(os);
-            }
-        }
-
-        void read(DataInputStream is, StringBuilder sb) throws IOException {
-            if (is.readBoolean()) {
-                this.record = new DictionaryRecord(sb.toString(), is.readUTF());
-            }
-            int child = is.readInt();
-            for (int i = 0; i < child; i++) {
-                char c = is.readChar();
-                Node newNode = new Node();
-                link.put(c, newNode);
-                newNode.read(is, sb.append(c));
-                sb.deleteCharAt(sb.length() - 1);
-            }
-        }
     }
 
     public static final int MISSPELLS_ALLOWED = 2;
-    private Node root;
+    private Node root = new Node();
 
     public Trie() {
         root = new Node();
     }
 
-    public void add(DictionaryRecord record) {
+    public Trie(File f) {
+        try {
+            read(f);
+        } catch (IOException e) {
+            Log.w(LOG_TAG, e);
+        }
+    }
+
+    public Trie(Reader reader) {
+        try {
+            read(reader);
+        } catch (IOException e) {
+            Log.w(LOG_TAG, e);
+        }
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void addWord(DictionaryRecord record) {
         Node current = root;
         for (int i = 0; i < record.getWord().length(); i++) {
             current = current.getNode(record.getWord().charAt(i));
         }
         current.setRecord(record);
+    }
+
+    public void addWords(List<DictionaryRecord> words) {
+        for (DictionaryRecord record : words) {
+            addWord(record);
+        }
     }
 
     private void search(String word, Node node, char prevChar, int[] prev, List<DictionaryRecord> result) {
@@ -125,6 +128,11 @@ public class Trie {
 
     public List<DictionaryRecord> search(String prefix) {
         List <DictionaryRecord> result = new ArrayList<>();
+        int j = prefix.length() - 1;
+        while (j > 0 && Character.isSpaceChar(prefix.charAt(j))) {
+            j--;
+        }
+        prefix = prefix.substring(0, j + 1);
         searchPrefix(prefix, 0, root, result);
         if (result.isEmpty()) {
             int[] arr = new int[prefix.length() + 1];
@@ -139,20 +147,5 @@ public class Trie {
         return result;
     }
 
-    public void read(File file) {
-        try (DataInputStream is = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))){
-            root = new Node();
-            root.read(is, new StringBuilder());
-        } catch (IOException e) {
-            //TODO log error
-        }
-    }
-
-    public void write(File file) {
-        try (DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
-            root.write(os);
-        } catch (IOException e) {
-            //TODO log error
-        }
-    }
+    private static final String LOG_TAG = Trie.class.getName();
 }

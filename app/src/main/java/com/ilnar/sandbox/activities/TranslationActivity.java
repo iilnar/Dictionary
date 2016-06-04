@@ -1,31 +1,27 @@
-package com.ilnar.sandbox;
+package com.ilnar.sandbox.activities;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.logging.Logger;
+import com.ilnar.sandbox.R;
 
 /**
  * Created by ilnar on 29.05.16.
  */
 public class TranslationActivity extends AppCompatActivity {
     private TextView translationView;
-    private final static String LOG_TAG = TranslationActivity.class.getName();
     private ShareActionProvider shareActionProvider;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,4 +72,6 @@ public class TranslationActivity extends AppCompatActivity {
         });
         return true;
     }
+
+    private final static String LOG_TAG = TranslationActivity.class.getName();
 }

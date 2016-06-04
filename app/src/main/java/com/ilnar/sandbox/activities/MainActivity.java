@@ -1,4 +1,4 @@
-package com.ilnar.sandbox;
+package com.ilnar.sandbox.activities;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -18,9 +18,15 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.ilnar.sandbox.DictionaryAdapter;
+import com.ilnar.sandbox.Util.DividerItemDecoration;
+import com.ilnar.sandbox.Util.DownloadService;
+import com.ilnar.sandbox.R;
+import com.ilnar.sandbox.Util.Utils;
 import com.ilnar.sandbox.database.RecentQueryDBHelper;
 import com.ilnar.sandbox.dictionary.Dictionary;
 import com.ilnar.sandbox.dictionary.DictionaryRecord;
+import com.ilnar.sandbox.dictionary.Trie;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,19 +36,21 @@ public class MainActivity extends AppCompatActivity {
     private List<DictionaryRecord> list;
     private Dictionary dictionary;
     private RecentQueryDBHelper recentQuery;
-    private SearchView searchView;
     private CharSequence query;
-
-    private static final String LOG_TAG = MainActivity.class.getName();
+    private SearchView searchView;
+    private MenuItem searchItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Utils.init(this);
+
         Log.d(LOG_TAG, "onCreate");
         setContentView(R.layout.activity_main);
-//        handleIntent(getIntent());
+
         recentQuery = RecentQueryDBHelper.getInstance(getApplicationContext());
-        dictionary = new Dictionary();
+        dictionary = new Trie(Utils.getDictionaryFile(true));
+
         list = new ArrayList<>();
 
         RecyclerView.LayoutManager layoutManager =  new LinearLayoutManager(getApplicationContext());
@@ -71,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }));
         handleIntent(getIntent());
+
     }
 
     @Override
@@ -90,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         if (Intent.ACTION_SEND.equals(intent.getAction())) {
             if (intent.getType().equals("text/plain")) {
                 query = intent.getStringExtra(Intent.EXTRA_TEXT);
-//                updateRecyclerView(intent.getStringExtra(Intent.EXTRA_TEXT));
+                setSearchView(query);
                 return;
             }
         }
@@ -107,11 +116,20 @@ public class MainActivity extends AppCompatActivity {
         dictionaryAdapter.notifyDataSetChanged();
     }
 
+    private void setSearchView(CharSequence query) {
+        if (!TextUtils.isEmpty(query)) {
+            if (searchItem != null && searchView != null) {
+                searchItem.expandActionView();
+                searchView.setQuery(query, true);
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         Log.d(LOG_TAG, "onCreateOptionsMenu");
         getMenuInflater().inflate(R.menu.search_menu, menu);
-        MenuItem searchItem = menu.findItem(R.id.search);
+        searchItem = menu.findItem(R.id.search);
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
         SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
@@ -147,22 +165,40 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        if (!TextUtils.isEmpty(query)) {
-            searchItem.expandActionView();
-            searchView.setQuery(query, true);
-        }
+        setSearchView(query);
+        MenuItem update = menu.findItem(R.id.update);
+        update.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Log.d(LOG_TAG, "update clicker");
+                new DownloadService(MainActivity.this).execute();
+                return true;
+            }
+        });
+
+        MenuItem clearHistory = menu.findItem(R.id.clear_history);
+        clearHistory.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                recentQuery.clearHistory();
+                updateRecyclerView(null);
+                return true;
+            }
+        });
+
         return true;
     }
 
     public interface ClickListener {
+
         void onClick(View v, int position);
         void onLongClick(View v, int position);
     }
 
     public static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
+
         private GestureDetector gestureDetector;
         private ClickListener clickListener;
-
         public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener) {
             gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                 @Override
@@ -197,5 +233,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
         }
+
     }
+    public void setDictionary(Dictionary dictionary) {
+        this.dictionary = dictionary;
+        updateRecyclerView(null);
+    }
+
+    private static final String LOG_TAG = MainActivity.class.getName();
 }
