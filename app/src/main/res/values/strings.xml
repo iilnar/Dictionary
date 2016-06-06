@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Sandbox</string>
+    <string name="word">Word</string>
+    <string name="translation">Translation</string>
+    <string name="submit">Submit</string>
+    <string name="search">Search</string>
+    <string name="clear_history">Clear history</string>
+    <string name="update_base">Update base</string>
+    <string name="add_translation">Add new word</string>
+    <string name="show_additional_buttons">Show additional buttons</string>
+    <string name="share">Share via</string>
+    <string name="edit_translation">Edit translation</string>
+    <string name="letter_1" translatable="false">ә</string>
+    <string name="letter_2" translatable="false">җ</string>
+    <string name="letter_3" translatable="false">ң</string>
+    <string name="letter_4" translatable="false">ө</string>
+    <string name="letter_5" translatable="false">ү</string>
+    <string name="letter_6" translatable="false">һ</string>
 </resources>

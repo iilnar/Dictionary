@@ -3,6 +3,8 @@ package com.ilnar.sandbox.activities;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,11 +19,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 
 import com.ilnar.sandbox.DictionaryAdapter;
 import com.ilnar.sandbox.Util.DividerItemDecoration;
 import com.ilnar.sandbox.Util.DownloadService;
 import com.ilnar.sandbox.R;
+import com.ilnar.sandbox.Util.KeyboardListener;
 import com.ilnar.sandbox.Util.Utils;
 import com.ilnar.sandbox.database.RecentQueryDBHelper;
 import com.ilnar.sandbox.dictionary.Dictionary;
@@ -56,36 +60,43 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager =  new LinearLayoutManager(getApplicationContext());
         dictionaryAdapter = new DictionaryAdapter(list);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(dictionaryAdapter);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
-            @Override
-            public void onClick(View v, int position) {
-                DictionaryRecord record = list.get(position);
-                Intent intent = new Intent(MainActivity.this, TranslationActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("word", record.getWord());
-                bundle.putString("translation", record.getTranslation());
-                intent.putExtras(bundle);
-                recentQuery.saveRecentQuery(record);
-                startActivity(intent);
-            }
+        if (recyclerView != null) {
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(dictionaryAdapter);
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+            recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
+                @Override
+                public void onClick(View v, int position) {
+                    DictionaryRecord record = list.get(position);
+                    Intent intent = new Intent(MainActivity.this, TranslationActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("word", record.getWord());
+                    bundle.putString("translation", record.getTranslation());
+                    intent.putExtras(bundle);
+                    recentQuery.saveRecentQuery(record);
+                    startActivity(intent);
+                }
 
-            @Override
-            public void onLongClick(View v, int position) {
+                @Override
+                public void onLongClick(View v, int position) {
 
-            }
-        }));
+                }
+            }));
+        }
         handleIntent(getIntent());
-
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         setIntent(intent);
         handleIntent(intent);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        Log.d(LOG_TAG, String.valueOf(newConfig.keyboardHidden));
+        super.onConfigurationChanged(newConfig);
     }
 
     private void handleIntent(Intent intent) {
@@ -131,11 +142,12 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.search_menu, menu);
         searchItem = menu.findItem(R.id.search);
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-
         SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
         if (searchManager != null) {
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         }
+        searchView.getViewTreeObserver().addOnGlobalLayoutListener(new KeyboardListener(findViewById(R.id.llFooter),
+                (EditText)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)));
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -192,6 +204,19 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(MainActivity.this, AddTranslationActivity.class);
                 startActivity(intent);
+                return true;
+            }
+        });
+
+        MenuItem showKeyboardCheckbox = menu.findItem(R.id.show_keyboard_checkbox);
+        final SharedPreferences preferences = getSharedPreferences("preferences", MODE_PRIVATE);
+        boolean isChecked = preferences.getBoolean("showKeyboard", true);
+        showKeyboardCheckbox.setChecked(isChecked);
+        showKeyboardCheckbox.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                item.setChecked(!item.isChecked());
+                preferences.edit().putBoolean("showKeyboard", item.isChecked()).apply();
                 return true;
             }
         });

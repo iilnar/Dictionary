@@ -2,17 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/search"
-        android:title="Search"
-        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/search"
+        android:icon="@drawable/ic_search_white_24dp"
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView" />
     <item android:id="@+id/clear_history"
-        android:icon="@android:drawable/ic_notification_clear_all"
-        android:title="Clear history"/>
+        android:title="@string/clear_history"/>
     <item android:id="@+id/update"
-        android:icon="@android:drawable/stat_sys_upload_done"
-        android:title="Update base" />
+        android:title="@string/update_base" />
     <item android:id="@+id/add_translation"
-        android:icon="@android:drawable/ic_input_add"
-        android:title="Add translation"/>
+        android:title="@string/add_translation"/>
+    <item
+        android:id="@+id/show_keyboard_checkbox"
+        android:title="@string/show_additional_buttons"
+        app:showAsAction="never"
+        android:visible="true"
+        android:checkable="true"/>
 </menu>

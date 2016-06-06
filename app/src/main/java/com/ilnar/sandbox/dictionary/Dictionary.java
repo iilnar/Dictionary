@@ -3,16 +3,12 @@ package com.ilnar.sandbox.dictionary;
 import android.util.JsonReader;
 import android.util.Log;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
@@ -79,18 +75,22 @@ public abstract class Dictionary {
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals("version")) {
-                version = reader.nextInt();
-            } else if (name.equals("data")) {
-                reader.beginArray();
-                while (reader.hasNext()) {
+            switch (name) {
+                case "version":
+                    version = reader.nextInt();
+                    break;
+                case "data":
                     reader.beginArray();
-                    addWord(new DictionaryRecord(reader.nextString(), reader.nextString()));
+                    while (reader.hasNext()) {
+                        reader.beginArray();
+                        addWord(new DictionaryRecord(reader.nextString(), reader.nextString()));
+                        reader.endArray();
+                    }
                     reader.endArray();
-                }
-                reader.endArray();
-            } else {
-                reader.skipValue();
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
             }
         }
         reader.endObject();

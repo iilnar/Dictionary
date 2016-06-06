@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.ilnar.sandbox.dictionary.DictionaryRecord;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

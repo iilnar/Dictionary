@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llFooter"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:gravity="bottom|center_horizontal"
+    android:orientation="horizontal"
+    android:visibility="invisible">
+
+    <Button
+        android:id="@+id/button1"
+        style="@style/additional_button"
+        android:text="@string/letter_1" />
+
+    <Button
+        android:id="@+id/button2"
+        style="@style/additional_button"
+        android:text="@string/letter_2" />
+
+    <Button
+        android:id="@+id/button3"
+        style="@style/additional_button"
+        android:text="@string/letter_3" />
+
+    <Button
+        android:id="@+id/button4"
+        style="@style/additional_button"
+        android:text="@string/letter_4" />
+
+    <Button
+        android:id="@+id/button5"
+        style="@style/additional_button"
+        android:text="@string/letter_5" />
+
+    <Button
+        android:id="@+id/button6"
+        style="@style/additional_button"
+        android:text="@string/letter_6" />
+</LinearLayout>

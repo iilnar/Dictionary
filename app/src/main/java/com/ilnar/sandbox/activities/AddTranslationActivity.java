@@ -1,16 +1,16 @@
 package com.ilnar.sandbox.activities;
 
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
 
 import com.ilnar.sandbox.R;
+import com.ilnar.sandbox.Util.KeyboardListener;
+
 
 public class AddTranslationActivity extends AppCompatActivity {
 
@@ -18,12 +18,19 @@ public class AddTranslationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_translation);
-        String word = getIntent().getStringExtra("word");
-        TextView wordView = (TextView)findViewById(R.id.word);
-        if (wordView != null) {
-            wordView.setText(word);
+        final String word = getIntent().getStringExtra("word");
+        final EditText wordView = (EditText) findViewById(R.id.word);
+        final EditText translationView = (EditText) findViewById(R.id.translation);
+        View footer = findViewById(R.id.llFooter);
+
+        assert wordView != null;
+        assert translationView != null;
+
+        wordView.getViewTreeObserver().addOnGlobalLayoutListener(new KeyboardListener(footer, wordView, translationView));
+        wordView.setText(word);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Button submit = (Button)findViewById(R.id.submit);
         if (submit != null) {
             submit.setOnClickListener(new View.OnClickListener() {

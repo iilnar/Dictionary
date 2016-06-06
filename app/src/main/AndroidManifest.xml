@@ -42,6 +42,7 @@
                 android:value=".activities.MainActivity" />
         </activity>
         <activity android:name=".activities.AddTranslationActivity"
+            android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".activities.MainActivity">
         </activity>
     </application>

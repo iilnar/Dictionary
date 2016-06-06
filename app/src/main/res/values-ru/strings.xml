@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sandbox</string>
+    <string name="add_translation">Добавить новое слово</string>
+    <string name="clear_history">Очистить историю</string>
+    <string name="edit_translation">Исправить перевод</string>
+    <string name="search">Поиск</string>
+    <string name="share">Поделиться через</string>
+    <string name="show_additional_buttons">Показывать татарские буквы</string>
+    <string name="submit">Отправить</string>
+    <string name="translation">Перевод</string>
+    <string name="update_base">Обновить базу слов</string>
+    <string name="word">Слово</string>
+</resources>

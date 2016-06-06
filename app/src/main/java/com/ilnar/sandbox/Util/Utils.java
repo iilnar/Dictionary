@@ -33,7 +33,7 @@ public class Utils {
             try (InputStream in = assetManager.open("data.dict");
                  DataOutputStream out = new DataOutputStream(new FileOutputStream(dictionaryFile))) {
                 byte[] buffer = new byte[1024];
-                int read = 0;
+                int read;
                 while ((read = in.read(buffer)) > 0) {
                     out.write(buffer, 0, read);
                 }

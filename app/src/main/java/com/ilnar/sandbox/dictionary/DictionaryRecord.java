@@ -1,5 +1,7 @@
 package com.ilnar.sandbox.dictionary;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created by ilnar on 29.05.16.
  */
@@ -31,7 +33,7 @@ public class DictionaryRecord implements Comparable<DictionaryRecord> {
     }
 
     @Override
-    public int compareTo(DictionaryRecord another) {
+    public int compareTo(@NonNull DictionaryRecord another) {
         return word.compareTo(another.word);
     }
 }
