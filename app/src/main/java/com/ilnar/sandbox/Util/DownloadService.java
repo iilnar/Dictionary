@@ -2,8 +2,11 @@ package com.ilnar.sandbox.Util;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.ilnar.sandbox.R;
 import com.ilnar.sandbox.activities.MainActivity;
+import com.ilnar.sandbox.database.RecentQueryDBHelper;
 import com.ilnar.sandbox.dictionary.Dictionary;
 import com.ilnar.sandbox.dictionary.ListDictionary;
 import com.ilnar.sandbox.dictionary.Trie;
@@ -23,9 +26,12 @@ public class DownloadService extends AsyncTask<Void, Void, Void> {
     private WeakReference<MainActivity> reference;
     Dictionary old;
     File folder;
+    boolean errorOccurred = false;
+
     public DownloadService(MainActivity activity) {
         reference = new WeakReference<>(activity);
         folder = activity.getExternalFilesDir(null);//TODO change to getFilesDir
+        Toast.makeText(activity, R.string.base_update_start, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -48,7 +54,7 @@ public class DownloadService extends AsyncTask<Void, Void, Void> {
 
             Dictionary update = new ListDictionary(new InputStreamReader(in));
 
-            if (update.getWords().size() == 0) {
+            if (update.getWords().isEmpty() ) {
                 return null;
             }
 
@@ -59,16 +65,21 @@ public class DownloadService extends AsyncTask<Void, Void, Void> {
             old.write(tmpFile);
             if (!dictionaryFile.exists() || dictionaryFile.delete()) {
                 if (tmpFile.renameTo(dictionaryFile)) {
-                    Log.d(LOG_TAG, "Updated successfully");
+                    Log.d(TAG, "Updated successfully");
                 } else {
-                    Log.e(LOG_TAG, "Couldn't rename");
+                    Log.e(TAG, "Couldn't rename");
+                    errorOccurred = true;
                 }
             } else {
-                Log.e(LOG_TAG, "Couldn't delete old dict");
+                Log.e(TAG, "Couldn't delete old dict");
+                errorOccurred = true;
             }
+            RecentQueryDBHelper recentQuery = RecentQueryDBHelper.getInstance(null);
+            recentQuery.updateTranslations(update.getWords());
 
         } catch (IOException e) {
-            Log.w(LOG_TAG, e);
+            Log.w(TAG, e);
+            errorOccurred = true;
         }
         return null;
     }
@@ -78,8 +89,13 @@ public class DownloadService extends AsyncTask<Void, Void, Void> {
         MainActivity activity = reference.get();
         if (activity != null) {
             activity.setDictionary(old);
+            if (!errorOccurred) {
+                Toast.makeText(activity, R.string.base_update_success, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(activity, R.string.base_update_failed, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
-    private static final String LOG_TAG = DownloadService.class.getName();
+    private static final String TAG = "DownloadService";
 }

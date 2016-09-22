@@ -11,4 +11,10 @@
     <string name="translation">Перевод</string>
     <string name="update_base">Обновить базу слов</string>
     <string name="word">Слово</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
+    <string name="base_update_success">База словаря обновлена</string>
+    <string name="no_search_history">Нет истории поиска</string>
+    <string name="base_update_start">Обновление начато</string>
+    <string name="base_update_failed">Во время обновления произошла ошибка</string>
+    <string name="no_search_result">Ничего не найдено</string>
 </resources>

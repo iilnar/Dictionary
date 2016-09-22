@@ -29,9 +29,9 @@ public class KeyboardListener implements ViewTreeObserver.OnGlobalLayoutListener
         searchViews[0].getWindowVisibleDisplayFrame(r);
         int screenHeight = searchViews[0].getRootView().getHeight();
         int keypadHeight = screenHeight - r.bottom;
-        Log.d(LOG_TAG, "keypad height " + keypadHeight);
+        Log.d(TAG, "keypad height " + keypadHeight);
         if (showKeyboard && keypadHeight > screenHeight * 0.15) {
-            Log.d(LOG_TAG, "opened");
+            Log.d(TAG, "opened");
             footer.setVisibility(View.VISIBLE);
             int[] buttonsId = {R.id.button1, R.id.button2, R.id.button3, R.id.button4, R.id.button5, R.id.button6};
             for (int id : buttonsId) {
@@ -41,7 +41,7 @@ public class KeyboardListener implements ViewTreeObserver.OnGlobalLayoutListener
                     public void onClick(View v) {
                         for (EditText text : searchViews) {
                             if (text.hasFocus()) {
-                                Log.d(LOG_TAG, text.getId() + " has focus");
+                                Log.d(TAG, text.getId() + " has focus");
                                 text.getText().insert(text.getSelectionStart(), b1.getText());
                             }
                         }
@@ -49,10 +49,10 @@ public class KeyboardListener implements ViewTreeObserver.OnGlobalLayoutListener
                 });
             }
         } else {
-            Log.d(LOG_TAG, "closed");
+            Log.d(TAG, "closed");
             footer.setVisibility(View.INVISIBLE);
         }
     }
 
-    private static final String LOG_TAG = KeyboardListener.class.getName();
+    private static final String TAG = "KeyboardListener";
 }

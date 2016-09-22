@@ -21,7 +21,7 @@ public class ListDictionary extends Dictionary {
         try {
             read(f);
         } catch (IOException e) {
-            Log.w(LOG_tAG, e);
+            Log.w(TAG, e);
         }
     }
 
@@ -29,7 +29,7 @@ public class ListDictionary extends Dictionary {
         try {
             read(reader);
         } catch (IOException e) {
-            Log.w(LOG_tAG,e);
+            Log.w(TAG,e);
         }
     }
 
@@ -42,7 +42,8 @@ public class ListDictionary extends Dictionary {
     }
 
     public List<DictionaryRecord> search(String prefix) {
-        Log.d(ListDictionary.class.getName(), "search called");
+        while (state != State.READY) {
+        }
         List<DictionaryRecord> records = new ArrayList<>();
         for (DictionaryRecord record : data) {
             if (record.getWord().startsWith(prefix)) {
@@ -52,5 +53,5 @@ public class ListDictionary extends Dictionary {
         return records;
     }
 
-    private static final String LOG_tAG = ListDictionary.class.getName();
+    private static final String TAG = "ListDictionary";
 }

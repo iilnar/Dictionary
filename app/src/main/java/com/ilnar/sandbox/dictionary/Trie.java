@@ -54,7 +54,7 @@ public class Trie extends Dictionary {
         try {
             read(f);
         } catch (IOException e) {
-            Log.w(LOG_TAG, e);
+            Log.w(TAG, e);
         }
     }
 
@@ -62,7 +62,7 @@ public class Trie extends Dictionary {
         try {
             read(reader);
         } catch (IOException e) {
-            Log.w(LOG_TAG, e);
+            Log.w(TAG, e);
         }
     }
 
@@ -121,6 +121,8 @@ public class Trie extends Dictionary {
     }
 
     public List<DictionaryRecord> search(String prefix) {
+        while (state != State.READY) {
+        }
         List <DictionaryRecord> result = new ArrayList<>();
         int j = prefix.length() - 1;
         while (j > 0 && Character.isSpaceChar(prefix.charAt(j))) {
@@ -141,5 +143,5 @@ public class Trie extends Dictionary {
         return result;
     }
 
-    private static final String LOG_TAG = Trie.class.getName();
+    private static final String TAG = "Trie";
 }

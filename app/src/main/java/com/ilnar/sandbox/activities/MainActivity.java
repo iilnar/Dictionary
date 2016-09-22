@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.ilnar.sandbox.DictionaryAdapter;
 import com.ilnar.sandbox.Util.DividerItemDecoration;
@@ -43,13 +46,14 @@ public class MainActivity extends AppCompatActivity {
     private CharSequence query;
     private SearchView searchView;
     private MenuItem searchItem;
+    private ProgressBar searchingProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Utils.init(this);
 
-        Log.d(LOG_TAG, "onCreate");
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
 
         recentQuery = RecentQueryDBHelper.getInstance(getApplicationContext());
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView.LayoutManager layoutManager =  new LinearLayoutManager(getApplicationContext());
         dictionaryAdapter = new DictionaryAdapter(list);
+        searchingProgressBar = (ProgressBar) findViewById(R.id.searching_progress_bar);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         if (recyclerView != null) {
             recyclerView.setLayoutManager(layoutManager);
@@ -95,12 +100,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        Log.d(LOG_TAG, String.valueOf(newConfig.keyboardHidden));
+        Log.d(TAG, String.valueOf(newConfig.keyboardHidden));
         super.onConfigurationChanged(newConfig);
     }
 
     private void handleIntent(Intent intent) {
-        Log.d(LOG_TAG + "handle", intent.getAction());
+        Log.d(TAG + "handle", intent.getAction());
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             Log.d("handleIntent", query);
@@ -117,14 +122,41 @@ public class MainActivity extends AppCompatActivity {
         updateRecyclerView(null);
     }
 
-    private void updateRecyclerView(String query) {
-        list.clear();
-        if (TextUtils.isEmpty(query)) {
-            list.addAll(recentQuery.getRecentQueries());
-        } else {
-            list.addAll(dictionary.search(query));
-        }
-        dictionaryAdapter.notifyDataSetChanged();
+    private void updateRecyclerView(final String query) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                list.clear();
+                searchingProgressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                if (TextUtils.isEmpty(query)) {
+                    list.addAll(recentQuery.getRecentQueries());
+                } else {
+                    list.addAll(dictionary.search(query));
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                searchingProgressBar.setVisibility(View.INVISIBLE);
+                dictionaryAdapter.notifyDataSetChanged();
+                TextView nothingFound = (TextView) findViewById(R.id.no_search_history);
+                if (nothingFound != null) {
+                    nothingFound.setText(getString(TextUtils.isEmpty(query) ? R.string.no_search_history : R.string.no_search_result));
+                }
+                if (nothingFound != null) {
+                    if (list.isEmpty()) {
+                        nothingFound.setVisibility(View.VISIBLE);
+                    } else {
+                        nothingFound.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
+        }.execute();
     }
 
     private void setSearchView(CharSequence query) {
@@ -138,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        Log.d(LOG_TAG, "onCreateOptionsMenu");
+        Log.d(TAG, "onCreateOptionsMenu");
         getMenuInflater().inflate(R.menu.search_menu, menu);
         searchItem = menu.findItem(R.id.search);
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
@@ -166,13 +198,13 @@ public class MainActivity extends AppCompatActivity {
         MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                Log.d(LOG_TAG, "expand");
+                Log.d(TAG, "expand");
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                Log.d(LOG_TAG, "collapse");
+                Log.d(TAG, "collapse");
                 updateRecyclerView(null);
                 return true;
             }
@@ -182,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         update.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Log.d(LOG_TAG, "update clicker");
+                Log.d(TAG, "update clicker");
                 new DownloadService(MainActivity.this).execute();
                 return true;
             }
@@ -225,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public interface ClickListener {
-
         void onClick(View v, int position);
         void onLongClick(View v, int position);
     }
@@ -275,5 +306,5 @@ public class MainActivity extends AppCompatActivity {
         updateRecyclerView(null);
     }
 
-    private static final String LOG_TAG = MainActivity.class.getName();
+    private static final String TAG = "MainActivity";
 }

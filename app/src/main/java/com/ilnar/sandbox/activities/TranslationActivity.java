@@ -35,8 +35,8 @@ public class TranslationActivity extends AppCompatActivity {
         if (translation == null) {
             translation = "No translation";
         }
-        Log.d(LOG_TAG, word);
-        Log.d(LOG_TAG, translation);
+        Log.d(TAG, word);
+        Log.d(TAG, translation);
         translationView = (TextView)findViewById(R.id.translation);
         if (translationView != null) {
             translationView.setText(Html.fromHtml(String.format("<h1>%s</h1><br>%s", word, translation.replace("\n", "<br>"))));
@@ -44,9 +44,9 @@ public class TranslationActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     ClipboardManager clipboardManager = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
-                    clipboardManager.setPrimaryClip(ClipData.newPlainText(LOG_TAG, translationView.getText()));
-                    Toast.makeText(getApplicationContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
-                    Log.d(LOG_TAG, "copied");
+                    clipboardManager.setPrimaryClip(ClipData.newPlainText(TAG, translationView.getText()));
+                    Toast.makeText(getApplicationContext(), getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "copied");
                 }
             });
         }
@@ -55,7 +55,7 @@ public class TranslationActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         CharSequence text = translationView.getText();
-        Log.d(LOG_TAG + "onCreateMenu", text.toString());
+        Log.d(TAG, "onCreateOptionsMenu: " + text);
         getMenuInflater().inflate(R.menu.translation_menu, menu);
 
         MenuItem shareButton = menu.findItem(R.id.menu_share);
@@ -66,7 +66,7 @@ public class TranslationActivity extends AppCompatActivity {
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_TEXT, translationView.getText().toString());
                 shareIntent.setType("text/plain");
-                startActivity(Intent.createChooser(shareIntent, "Send via"));
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
                 return true;
             }
         });
@@ -85,5 +85,5 @@ public class TranslationActivity extends AppCompatActivity {
         return true;
     }
 
-    private final static String LOG_TAG = TranslationActivity.class.getName();
+    private static final String TAG = "TranslationActivity";
 }

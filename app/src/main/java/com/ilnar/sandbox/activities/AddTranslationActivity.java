@@ -36,7 +36,7 @@ public class AddTranslationActivity extends AppCompatActivity {
             submit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(LOG_TAG, "submit");
+                    Log.d(TAG, "submit");
                 }
             });
         }
@@ -53,5 +53,5 @@ public class AddTranslationActivity extends AppCompatActivity {
         }
     }
 
-    private static final String LOG_TAG = AddTranslationActivity.class.getName();
+    private static final String TAG = "AddTranslationActivity";
 }

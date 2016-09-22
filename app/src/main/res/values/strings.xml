@@ -16,4 +16,10 @@
     <string name="letter_4" translatable="false">ө</string>
     <string name="letter_5" translatable="false">ү</string>
     <string name="letter_6" translatable="false">һ</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="no_search_history">No search history</string>
+    <string name="base_update_success">Dictionary base updated</string>
+    <string name="base_update_start">Dictionary update started</string>
+    <string name="base_update_failed">Base update failed</string>
+    <string name="no_search_result">Nothing found</string>
 </resources>

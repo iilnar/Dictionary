@@ -37,22 +37,19 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
         return instance;
     }
 
-    private final Context context;
-
     private RecentQueryDBHelper(Context context) {
         super(context, DB_FILE_NAME, null, DB_VERSION);
-        this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d(LOG_TAG, "create db: " + RecentQueryContract.QueriesTable.CREATE_TABLE);
+        Log.d(TAG, "create db: " + RecentQueryContract.QueriesTable.CREATE_TABLE);
         db.execSQL(RecentQueryContract.QueriesTable.CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d(LOG_TAG, "onUpgrade");
+        Log.d(TAG, "onUpgrade");
         db.execSQL(RecentQueryContract.QueriesTable.DROP_TABLE);
         onCreate(db);
     }
@@ -87,7 +84,7 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
         if (query == null || TextUtils.isEmpty(query.getWord())) {
             return;
         }
-        Log.d(LOG_TAG, "saveQuery " + query.getWord());
+        Log.d(TAG, "saveQuery " + query.getWord());
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -107,7 +104,8 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
                     db.update(RecentQueryContract.QueriesTable.TABLE,
                             values,
                             q,
-                            new String[]{query.getWord()});
+                            new String[]{query.getWord()}
+                    );
                 } else {
                     db.insert(RecentQueryContract.QueriesTable.TABLE, null, getContentValues(query));
                 }
@@ -121,7 +119,7 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
     public List<DictionaryRecord> getRecentQueries() {
         List<DictionaryRecord> result = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
-        Log.d(LOG_TAG, "getRecent");
+        Log.d(TAG, "getRecentQueries: ");
         Cursor c = db.query(RecentQueryContract.QueriesTable.TABLE, null, null, null, null, null,
                 RecentQueryContract.RecentQueryColumns.COLUMN_NAME_DATE + " DESC");
         if (c != null && c.moveToFirst()) {
@@ -131,7 +129,7 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
             }
         }
         for (DictionaryRecord e : result) {
-            Log.d(LOG_TAG, "el=" + e.getWord());
+            Log.d(TAG, "el=" + e.getWord());
         }
         if (c != null) {
             c.close();
@@ -139,6 +137,24 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    private static final String LOG_TAG = RecentQueryDBHelper.class.getName();
+    private void updateTranslation(DictionaryRecord dr) {
+        SQLiteDatabase db = getWritableDatabase();
+        String q = RecentQueryContract.RecentQueryColumns.COLUMN_NAME_WORD + "=?";
+        ContentValues values = new ContentValues();
+        values.put(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_TRANSLATION, dr.getTranslation());
+        db.update(
+                RecentQueryContract.QueriesTable.TABLE,
+                values,
+                q,
+                new String[]{dr.getWord()}
+        );
+    }
 
+    public void updateTranslations(List<DictionaryRecord> words) {
+        for (DictionaryRecord record : words) {
+            updateTranslation(record);
+        }
+    }
+
+    private static final String TAG = "RecentQueryDBHelper";
 }

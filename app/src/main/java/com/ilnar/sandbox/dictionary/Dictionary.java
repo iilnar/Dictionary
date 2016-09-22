@@ -17,6 +17,11 @@ import java.util.List;
  * Created by ilnar on 03.06.16.
  */
 public abstract class Dictionary {
+    enum State {
+        READING, READY
+    }
+
+    State state = State.READY;
 
     int version = 0;
 
@@ -39,10 +44,13 @@ public abstract class Dictionary {
     }
 
     public void write(File f) {
-        try (Writer os = new BufferedWriter(new FileWriter(f))) {
+        Writer os = null;
+        state = State.READING;
+        try {
+            os = new BufferedWriter(new FileWriter(f));
             List<DictionaryRecord> words = getWords();
             os.write("{");
-            os.write("\"version\":1, \n");
+            os.write(String.format("\"version\":%d, \n", getVersion()));
             os.write("\"data\": [\n");
             int count = words.size();
             for (int i = 0; i < count; i++) {
@@ -59,6 +67,15 @@ public abstract class Dictionary {
             os.write("}\n");
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            state = State.READY;
         }
     }
 
@@ -95,8 +112,9 @@ public abstract class Dictionary {
         }
         reader.endObject();
         long end = System.currentTimeMillis();
-        Log.d(LOG_TAG, String.format("Reading took%d ms", end - begin));
+        Log.d(TAG, String.format("Reading took%d ms", end - begin));
     }
 
-    private static final String LOG_TAG = Dictionary.class.getName();
+
+    private static final String TAG = "Dictionary";
 }

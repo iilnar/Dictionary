@@ -38,11 +38,11 @@ public class Utils {
                     out.write(buffer, 0, read);
                 }
             } catch (IOException e) {
-                Log.w(LOG_TAG, e);
+                Log.w(TAG, e);
             }
         }
         return dictionaryFile;
     }
 
-    public static final String LOG_TAG = Utils.class.getName();
+    private static final String TAG = "Utils";
 }
