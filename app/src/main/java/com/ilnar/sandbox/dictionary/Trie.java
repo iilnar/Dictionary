@@ -51,19 +51,7 @@ public class Trie extends Dictionary {
     }
 
     public Trie(File f) {
-        try {
-            read(f);
-        } catch (IOException e) {
-            Log.w(TAG, e);
-        }
-    }
-
-    public Trie(Reader reader) {
-        try {
-            read(reader);
-        } catch (IOException e) {
-            Log.w(TAG, e);
-        }
+        read(f);
     }
 
     public int getVersion() {

@@ -6,6 +6,7 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -45,7 +46,6 @@ public abstract class Dictionary {
 
     public void write(File f) {
         Writer os = null;
-        state = State.READING;
         try {
             os = new BufferedWriter(new FileWriter(f));
             List<DictionaryRecord> words = getWords();
@@ -75,12 +75,28 @@ public abstract class Dictionary {
                     e.printStackTrace();
                 }
             }
-            state = State.READY;
         }
     }
 
-    protected void read(File f) throws IOException {
-        read(new BufferedReader(new FileReader(f)));
+    protected void read(File f) {
+        state = State.READING;
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(f));
+            read(reader);
+        } catch (IOException e) {
+            Log.w(TAG, e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            state = State.READY;
+        }
+
     }
 
     protected void read(Reader is) throws IOException {

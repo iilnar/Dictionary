@@ -18,11 +18,7 @@ public class ListDictionary extends Dictionary {
     }
 
     public ListDictionary(File f){
-        try {
-            read(f);
-        } catch (IOException e) {
-            Log.w(TAG, e);
-        }
+        read(f);
     }
 
     public ListDictionary(Reader reader) {

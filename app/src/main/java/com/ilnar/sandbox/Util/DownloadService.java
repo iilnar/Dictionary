@@ -61,7 +61,8 @@ public class DownloadService extends AsyncTask<Void, Void, Void> {
             old.setVersion(update.getVersion());
             old.addWords(update.getWords());
 
-            File tmpFile = File.createTempFile("data", "dict", folder);
+//            File tmpFile = File.createTempFile("data", "dict", folder);
+            File tmpFile = new File(dictionaryFile + ".temp");
             old.write(tmpFile);
             if (!dictionaryFile.exists() || dictionaryFile.delete()) {
                 if (tmpFile.renameTo(dictionaryFile)) {
