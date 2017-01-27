@@ -17,4 +17,6 @@
     <string name="base_update_start">Обновление начато</string>
     <string name="base_update_failed">Во время обновления произошла ошибка</string>
     <string name="no_search_result">Ничего не найдено</string>
+    <string name="no_translation">Перевод отсутствует</string>
+    <string name="no_word">Нет слова</string>
 </resources>

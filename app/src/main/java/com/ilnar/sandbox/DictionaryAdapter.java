@@ -40,7 +40,7 @@ public class DictionaryAdapter extends RecyclerView.Adapter<DictionaryAdapter.My
     public void onBindViewHolder(MyViewHolder holder, int position) {
         DictionaryRecord dictionaryRecord = recordsList.get(position);
         holder.word.setText(dictionaryRecord.getWord());
-        holder.translation.setText(dictionaryRecord.getTranslation());
+        holder.translation.setText(dictionaryRecord.getTranslation()[0]);
     }
 
     @Override

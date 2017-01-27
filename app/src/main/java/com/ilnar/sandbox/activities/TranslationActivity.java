@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ilnar.sandbox.R;
+import com.ilnar.sandbox.dictionary.DictionaryRecord;
 
 /**
  * Created by ilnar on 29.05.16.
@@ -25,21 +27,29 @@ public class TranslationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.translation_layout);
+        setContentView(R.layout.activity_translation);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.translation_toolbar);
+        setSupportActionBar(toolbar);
+
         Bundle b = getIntent().getExtras();
-        word = b.getString("word");
-        String translation = b.getString("translation");
+        word = b.getString(DictionaryRecord.WORD);
+        String[] translation = b.getStringArray(DictionaryRecord.TRANSLATION);
         if (word == null) {
-            word = "No word";
+            word = getString(R.string.no_word);
         }
         if (translation == null) {
-            translation = "No translation";
+            translation = new String[]{getString(R.string.no_translation)};
         }
-        Log.d(TAG, word);
-        Log.d(TAG, translation);
+
+        StringBuilder translations = new StringBuilder();
+        for (int i = 0; i < translation.length; i++) {
+            translations.append(String.format("%d) %s\n", i + 1, translation[i]));
+        }
+
         translationView = (TextView)findViewById(R.id.translation);
         if (translationView != null) {
-            translationView.setText(Html.fromHtml(String.format("<h1>%s</h1><br>%s", word, translation.replace("\n", "<br>"))));
+            translationView.setText(Html.fromHtml(String.format("<h1>%s</h1><br>%s", word, translations.toString().replace("\n", "<br>"))));
             translationView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -76,7 +86,7 @@ public class TranslationActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(TranslationActivity.this, AddTranslationActivity.class);
-                intent.putExtra("word", word);
+                intent.putExtra(DictionaryRecord.WORD, word);
                 startActivity(intent);
                 return true;
             }

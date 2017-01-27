@@ -8,19 +8,26 @@ import com.ilnar.sandbox.Util.Alphabet;
  * Created by ilnar on 29.05.16.
  */
 public class DictionaryRecord implements Comparable<DictionaryRecord> {
-    private final String word;
-    private final String translation;
+    public static final String WORD = "word";
+    public static final String TRANSLATION = "translation";
 
-    public DictionaryRecord(String word, String translation) {
+    private final String word;
+    private final String pos;
+    private final String[] translation;
+    private final String[] examples;
+
+    public DictionaryRecord(String word, String pos, String[] translation, String[] examples) {
         this.word = word;
+        this.pos = pos;
         this.translation = translation;
+        this.examples = examples;
     }
 
     public String getWord() {
         return word;
     }
 
-    public String getTranslation() {
+    public String[] getTranslation() {
         return translation;
     }
 
@@ -52,3 +59,4 @@ public class DictionaryRecord implements Comparable<DictionaryRecord> {
         }
     }
 }
+

@@ -18,20 +18,21 @@ public class Utils {
 
     private static AssetManager assetManager;
 
-    public static String dictionaryFileName = "newdata.dict";
-
-    public static String updateURL = "http://rain.ifmo.ru/~sabirzyanov/download.php";
+    public static String dictionaryFileNames[] = new String[]{"ttr.json", "rtt.json"};
 
     public static void init(Activity activity) {
         externalFilesDir = activity.getExternalFilesDir(null);
         assetManager = activity.getAssets();
     }
 
-    public static File getDictionaryFile(boolean loadFromAsset) {
-        File dictionaryFile = new File(externalFilesDir, dictionaryFileName);
+    public static File getDictionaryFile(int dictNumber, boolean loadFromAsset) {
+        File dictionaryFile = new File(externalFilesDir, dictionaryFileNames[dictNumber]);
         if (loadFromAsset && !dictionaryFile.exists()) {
-            try (InputStream in = assetManager.open("data.dict");
-                 DataOutputStream out = new DataOutputStream(new FileOutputStream(dictionaryFile))) {
+            InputStream in = null;
+            DataOutputStream out = null;
+            try {
+                in = assetManager.open(dictionaryFileNames[dictNumber]);
+                out = new DataOutputStream(new FileOutputStream(dictionaryFile));
                 byte[] buffer = new byte[1024];
                 int read;
                 while ((read = in.read(buffer)) > 0) {
@@ -39,6 +40,19 @@ public class Utils {
                 }
             } catch (IOException e) {
                 Log.w(TAG, e);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException ignored) {
+                    }
+                }
             }
         }
         return dictionaryFile;

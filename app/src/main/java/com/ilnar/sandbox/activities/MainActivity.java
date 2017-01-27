@@ -6,90 +6,86 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ilnar.sandbox.DictionaryAdapter;
+import com.ilnar.sandbox.Recorder;
 import com.ilnar.sandbox.Util.DividerItemDecoration;
-import com.ilnar.sandbox.Util.DownloadService;
 import com.ilnar.sandbox.R;
 import com.ilnar.sandbox.Util.KeyboardListener;
 import com.ilnar.sandbox.Util.Utils;
 import com.ilnar.sandbox.database.RecentQueryDBHelper;
 import com.ilnar.sandbox.dictionary.Dictionary;
 import com.ilnar.sandbox.dictionary.DictionaryRecord;
+import com.ilnar.sandbox.dictionary.ListDictionary;
 import com.ilnar.sandbox.dictionary.Trie;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private DictionaryAdapter dictionaryAdapter;
-    private List<DictionaryRecord> list;
-    private Dictionary dictionary;
-    private RecentQueryDBHelper recentQuery;
     private CharSequence query;
     private SearchView searchView;
     private MenuItem searchItem;
-    private ProgressBar searchingProgressBar;
 
+    private Recorder recorder;
+
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Utils.init(this);
 
-        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
 
-        recentQuery = RecentQueryDBHelper.getInstance(getApplicationContext());
-        dictionary = new Trie(Utils.getDictionaryFile(true));
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        list = new ArrayList<>();
+        // Create the adapter that will return a cFragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        RecyclerView.LayoutManager layoutManager =  new LinearLayoutManager(getApplicationContext());
-        dictionaryAdapter = new DictionaryAdapter(list);
-        searchingProgressBar = (ProgressBar) findViewById(R.id.searching_progress_bar);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        if (recyclerView != null) {
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setAdapter(dictionaryAdapter);
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
-            recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-            recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
-                @Override
-                public void onClick(View v, int position) {
-                    DictionaryRecord record = list.get(position);
-                    Intent intent = new Intent(MainActivity.this, TranslationActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("word", record.getWord());
-                    bundle.putString("translation", record.getTranslation());
-                    intent.putExtras(bundle);
-                    recentQuery.saveRecentQuery(record);
-                    startActivity(intent);
-                }
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
 
-                @Override
-                public void onLongClick(View v, int position) {
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
 
-                }
-            }));
-        }
         handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume called");
     }
 
     @Override
@@ -119,44 +115,10 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-        updateRecyclerView(null);
     }
 
-    private void updateRecyclerView(final String query) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                list.clear();
-                searchingProgressBar.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                if (TextUtils.isEmpty(query)) {
-                    list.addAll(recentQuery.getRecentQueries());
-                } else {
-                    list.addAll(dictionary.search(query));
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                searchingProgressBar.setVisibility(View.INVISIBLE);
-                dictionaryAdapter.notifyDataSetChanged();
-                TextView nothingFound = (TextView) findViewById(R.id.no_search_history);
-                if (nothingFound != null) {
-                    nothingFound.setText(getString(TextUtils.isEmpty(query) ? R.string.no_search_history : R.string.no_search_result));
-                }
-                if (nothingFound != null) {
-                    if (list.isEmpty()) {
-                        nothingFound.setVisibility(View.VISIBLE);
-                    } else {
-                        nothingFound.setVisibility(View.INVISIBLE);
-                    }
-                }
-            }
-        }.execute();
+    private void updateRecyclerView(String query) {
+        mSectionsPagerAdapter.provideSearch(query);
     }
 
     private void setSearchView(CharSequence query) {
@@ -210,21 +172,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         setSearchView(query);
-        MenuItem update = menu.findItem(R.id.update);
-        update.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                Log.d(TAG, "update clicker");
-                new DownloadService(MainActivity.this).execute();
-                return true;
-            }
-        });
 
         MenuItem clearHistory = menu.findItem(R.id.clear_history);
         clearHistory.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                recentQuery.clearHistory();
+//                recentQuery.clearHistory(); TODO clear history
                 updateRecyclerView(null);
                 return true;
             }
@@ -236,6 +189,26 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(MainActivity.this, AddTranslationActivity.class);
                 startActivity(intent);
+                return true;
+            }
+        });
+
+        MenuItem recognizer = menu.findItem(R.id.mic_button);
+        recognizer.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (recorder == null) {
+                    recorder = new Recorder() {
+                        @Override
+                        public void onDone(String result) {
+                            Toast.makeText(MainActivity.this, result, Toast.LENGTH_LONG).show();
+                            updateRecyclerView(result);
+                        }
+                    };
+                } else {
+                    recorder.stop();
+                    recorder = null;
+                }
                 return true;
             }
         });
@@ -262,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
-
         private GestureDetector gestureDetector;
         private ClickListener clickListener;
         public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener) {
@@ -301,9 +273,181 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    public void setDictionary(Dictionary dictionary) {
-        this.dictionary = dictionary;
-        updateRecyclerView(null);
+
+    /**
+     * A placeholder cFragment containing a simple view.
+     */
+    public static class PlaceholderFragment extends Fragment {
+        private DictionaryAdapter dictionaryAdapter;
+        private List<DictionaryRecord> list;
+        private Dictionary dictionary;
+        private ProgressBar searchingProgressBar;
+        private TextView nothingFound;
+        private RecentQueryDBHelper recentQuery;
+
+        public int sectionNumber;
+
+        /**
+         * The cFragment argument representing the section number for this
+         * cFragment.
+         */
+        private static final String ARG_SECTION_NUMBER = "section_number";
+
+        public PlaceholderFragment() {
+        }
+
+        /**
+         * Returns a new instance of this cFragment for the given section
+         * number.
+         */
+        public static PlaceholderFragment newInstance(int sectionNumber) {
+            PlaceholderFragment fragment = new PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            Log.d(TAG, "created " + sectionNumber);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_content, container, false);
+            return rootView;
+        }
+
+        @Override
+        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+            searchingProgressBar = (ProgressBar) view.findViewById(R.id.searching_progress_bar);
+            nothingFound = (TextView) view.findViewById(R.id.no_search_history);
+
+            sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
+            dictionary = new Trie(Utils.getDictionaryFile(sectionNumber, true));
+            list = new ArrayList<>();
+
+            Log.d(TAG, "onViewCreated: " + sectionNumber);
+
+            recentQuery = RecentQueryDBHelper.getInstance(getContext());
+
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+            dictionaryAdapter = new DictionaryAdapter(list);
+
+            if (recyclerView != null) {
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(dictionaryAdapter);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+                recyclerView.addOnItemTouchListener(new MainActivity.RecyclerTouchListener(getContext(), recyclerView, new MainActivity.ClickListener() {
+                    @Override
+                    public void onClick(View v, int position) {
+                        DictionaryRecord record = list.get(position);
+                        Intent intent = new Intent(getActivity(), TranslationActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("word", record.getWord());
+                        bundle.putStringArray("translation", record.getTranslation());
+                        intent.putExtras(bundle);
+//                        recentQuery.saveRecentQuery(record);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onLongClick(View v, int position) {
+
+                    }
+                }));
+            }
+            updateRecyclerView("");
+            super.onViewCreated(view, savedInstanceState);
+        }
+
+        private void updateRecyclerView(String query) {
+            Log.d(TAG, "Called query=" + query + " time=" + System.currentTimeMillis());
+            new AsyncTask<String, Void, List<DictionaryRecord>>() {
+                private String query;
+
+                @Override
+                protected void onPreExecute() {
+                    list.clear();
+                    searchingProgressBar.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                protected List<DictionaryRecord> doInBackground(String... params) {
+                    query = params.length == 0 ? null : params[0];
+//                    if (TextUtils.isEmpty(query)) {
+//                        return recentQuery.getRecentQueries();
+//                    } else {
+                    return dictionary.search(query);
+//                    }
+                }
+
+                @Override
+                protected void onPostExecute(List<DictionaryRecord> results) {
+                    list.addAll(results);
+                    searchingProgressBar.setVisibility(View.INVISIBLE);
+                    dictionaryAdapter.notifyDataSetChanged();
+
+                    if (nothingFound != null) {
+                        nothingFound.setText(getString(TextUtils.isEmpty(query) ? R.string.no_search_history : R.string.no_search_result));
+                    }
+                    if (nothingFound != null) {
+                        if (list.isEmpty()) {
+                            nothingFound.setVisibility(View.VISIBLE);
+                        } else {
+                            nothingFound.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                }
+            }.execute(query);
+        }
+
+        private static final String TAG = "PlaceholderFragment";
+    }
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a cFragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private PlaceholderFragment[] fragments;
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+            fragments = new PlaceholderFragment[getCount()];
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            // getItem is called to instantiate the cFragment for the given page.
+            // Return a PlaceholderFragment (defined as a static inner class below).
+            if (fragments[position] == null) {
+                fragments[position] = PlaceholderFragment.newInstance(position);
+            }
+            return fragments[position];
+        }
+
+        @Override
+        public int getCount() {
+            // Show 2 total pages.
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "тат-рус";
+                case 1:
+                    return "рус-тат";
+            }
+            return null;
+        }
+
+        public void provideSearch(String query) {
+            for (int i = 0; i < getCount(); i++) {
+                fragments[i].updateRecyclerView(query);
+            }
+        }
     }
 
     private static final String TAG = "MainActivity";

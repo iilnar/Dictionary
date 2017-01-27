@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -42,40 +43,6 @@ public abstract class Dictionary {
 
     public List<DictionaryRecord> getWords() {
         return search("");
-    }
-
-    public void write(File f) {
-        Writer os = null;
-        try {
-            os = new BufferedWriter(new FileWriter(f));
-            List<DictionaryRecord> words = getWords();
-            os.write("{");
-            os.write(String.format("\"version\":%d, \n", getVersion()));
-            os.write("\"data\": [\n");
-            int count = words.size();
-            for (int i = 0; i < count; i++) {
-                os.write("[\n");
-                os.write(String.format("\"%s\",\n", words.get(i).getWord()));
-                os.write(String.format("\"%s\"\n", words.get(i).getTranslation()));
-                if (i + 1 != count) {
-                    os.write("],\n");
-                } else {
-                    os.write("]\n");
-                }
-            }
-            os.write("]\n");
-            os.write("}\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     protected void read(File f) {
@@ -112,12 +79,47 @@ public abstract class Dictionary {
                 case "version":
                     version = reader.nextInt();
                     break;
-                case "data":
+                case "entries":
                     reader.beginArray();
                     while (reader.hasNext()) {
-                        reader.beginArray();
-                        addWord(new DictionaryRecord(reader.nextString(), reader.nextString()));
-                        reader.endArray();
+                        reader.beginObject();
+
+                        String word = null;
+                        String pos = null;
+                        LinkedList<String> translation = new LinkedList<>();
+                        LinkedList<String> examples = new LinkedList<>();
+
+                        while (reader.hasNext()) {
+                            name = reader.nextName().toLowerCase();
+                            switch (name) {
+                                case "word":
+                                    word = reader.nextString();
+                                    break;
+                                case "pos":
+                                    pos = reader.nextString();
+                                    break;
+                                case "translation":
+                                    reader.beginArray();
+                                    while (reader.hasNext()) {
+                                        translation.add(reader.nextString());
+                                    }
+                                    reader.endArray();
+                                    break;
+                                case "examples":
+                                    reader.beginArray();
+                                    while (reader.hasNext()) {
+                                        examples.add(reader.nextString());
+                                    }
+                                    reader.endArray();
+                                    break;
+                                default:
+                                    reader.skipValue();
+                            }
+                        }
+
+                        addWord(new DictionaryRecord(word, pos, translation.toArray(new String[1]), examples.toArray(new String[1])));
+
+                        reader.endObject();
                     }
                     reader.endArray();
                     break;

@@ -63,7 +63,7 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
     private ContentValues getContentValues(DictionaryRecord query) {
         ContentValues result = new ContentValues();
         result.put(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_WORD, query.getWord());
-        result.put(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_TRANSLATION, query.getTranslation());
+        result.put(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_TRANSLATION, query.getTranslation()[0]);
         result.put(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_DATE, getCurrentTimestamp());
         return result;
     }
@@ -71,7 +71,7 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
     private DictionaryRecord getDictionaryRecord(Cursor c) {
         int wordId = c.getColumnIndexOrThrow(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_WORD);
         int translationId = c.getColumnIndexOrThrow(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_TRANSLATION);
-        return new DictionaryRecord(c.getString(wordId), c.getString(translationId));
+        return new DictionaryRecord(c.getString(wordId), null, new String[]{c.getString(translationId)}, null);
     }
 
     public void clearHistory() {
@@ -141,7 +141,7 @@ public class RecentQueryDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         String q = RecentQueryContract.RecentQueryColumns.COLUMN_NAME_WORD + "=?";
         ContentValues values = new ContentValues();
-        values.put(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_TRANSLATION, dr.getTranslation());
+        values.put(RecentQueryContract.RecentQueryColumns.COLUMN_NAME_TRANSLATION, dr.getTranslation()[0]);
         db.update(
                 RecentQueryContract.QueriesTable.TABLE,
                 values,

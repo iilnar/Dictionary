@@ -10,6 +10,7 @@ import android.widget.EditText;
 
 import com.ilnar.sandbox.R;
 import com.ilnar.sandbox.Util.KeyboardListener;
+import com.ilnar.sandbox.dictionary.DictionaryRecord;
 
 
 public class AddTranslationActivity extends AppCompatActivity {
@@ -18,7 +19,7 @@ public class AddTranslationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_translation);
-        final String word = getIntent().getStringExtra("word");
+        final String word = getIntent().getStringExtra(DictionaryRecord.WORD);
         final EditText wordView = (EditText) findViewById(R.id.word);
         final EditText translationView = (EditText) findViewById(R.id.translation);
         View footer = findViewById(R.id.llFooter);

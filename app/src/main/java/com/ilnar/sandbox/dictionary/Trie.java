@@ -5,11 +5,15 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ilnar on 01.06.16.
@@ -17,11 +21,13 @@ import java.util.Map;
 public class Trie extends Dictionary {
     private class Node {
         private HashMap<Character, Node> link;
+        //small object
+        char smoC;
+        Node smoN;
+
         private DictionaryRecord record;
 
-        Node() {
-            this.link = new HashMap<>(4);
-        }
+        Node() {}
 
         void setRecord(DictionaryRecord record) {
             this.record = record;
@@ -36,14 +42,90 @@ public class Trie extends Dictionary {
         }
 
         Node getNode(Character c) {
+            if (link == null) {
+                if (c == smoC) {
+                    return smoN;
+                }
+                return null;
+            }
+            return link.get(c);
+        }
+
+        Node getNodeOrAdd(char c) {
+            if (link == null) {
+                if (c == smoC) {
+                    return smoN;
+                } else {
+                    if (smoC == '\u0000') {
+                        smoC = c;
+                        smoN = new Node();
+                        return smoN;
+                    } else {
+                        link = new HashMap<>(4);
+                        link.put(smoC, smoN);
+                        smoC = '\u0000';
+                        smoN = null;
+                        Node node = new Node();
+                        link.put(c, node);
+                        return node;
+                    }
+                }
+            }
             if (!containsNode(c)) {
                 link.put(c, new Node());
             }
             return link.get(c);
         }
+
+        Set<Map.Entry<Character, Node>> entrySet() {
+            if (link != null) {
+                return link.entrySet();
+            }
+            return new AbstractSet<Map.Entry<Character, Node>>() {
+                @Override
+                public Iterator<Map.Entry<Character, Node>> iterator() {
+                    return new Iterator<Map.Entry<Character, Node>>() {
+                        @Override
+                        public boolean hasNext() {
+                            return false;
+                        }
+
+                        @Override
+                        public Map.Entry<Character, Node> next() {
+                            return new Map.Entry<Character, Node>() {
+                                @Override
+                                public Character getKey() {
+                                    return smoC;
+                                }
+
+                                @Override
+                                public Node getValue() {
+                                    return smoN;
+                                }
+
+                                @Override
+                                public Node setValue(Node object) {
+                                    return null;
+                                }
+                            };
+                        }
+
+                        @Override
+                        public void remove() {
+
+                        }
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return smoC == '\u0000' ? 0 : 1;
+                }
+            };
+        }
     }
 
-    public static final int MISSPELLS_ALLOWED = 2;
+    private static final int MISSPELLS_ALLOWED = 2;
     private Node root = new Node();
 
     public Trie() {
@@ -61,7 +143,7 @@ public class Trie extends Dictionary {
     public void addWord(DictionaryRecord record) {
         Node current = root;
         for (int i = 0; i < record.getWord().length(); i++) {
-            current = current.getNode(record.getWord().charAt(i));
+            current = current.getNodeOrAdd(record.getWord().charAt(i));
         }
         current.setRecord(record);
     }
@@ -93,6 +175,9 @@ public class Trie extends Dictionary {
     }
 
     private void searchPrefix(String prefix, int pos, Node node, List<DictionaryRecord> result) {
+        if (node == null) {
+            return;
+        }
         if (pos < prefix.length()) {
             if (node.containsNode(prefix.charAt(pos))) {
                 searchPrefix(prefix, pos + 1, node.getNode(prefix.charAt(pos)), result);
@@ -101,7 +186,7 @@ public class Trie extends Dictionary {
             if (node.getRecord() != null) {
                 result.add(node.getRecord());
             }
-            for (Map.Entry<Character, Node> characterNodeEntry : node.link.entrySet()) {
+            for (Map.Entry<Character, Node> characterNodeEntry : node.entrySet()) {
                 Node nextNode = characterNodeEntry.getValue();
                 searchPrefix(prefix, pos + 1, nextNode, result);
             }
@@ -123,7 +208,7 @@ public class Trie extends Dictionary {
             for (int i = 0; i < arr.length; i++) {
                 arr[i] = i;
             }
-            for (Map.Entry<Character, Node> characterNodeEntry : root.link.entrySet()) {
+            for (Map.Entry<Character, Node> characterNodeEntry : root.entrySet()) {
                 search(prefix, characterNodeEntry.getValue(), characterNodeEntry.getKey(), arr, result);
             }
         }
