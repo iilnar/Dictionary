@@ -6,16 +6,18 @@
         android:icon="@drawable/ic_search_white_24dp"
         app:showAsAction="collapseActionView|always"
         app:actionViewClass="android.support.v7.widget.SearchView" />
-    <item android:id="@+id/mic_button"
-        android:title="@string/search"
+    <item
+        android:id="@+id/mic_button"
         android:icon="@drawable/ic_mic_white_24dp"
+        android:title="@string/search"
+        android:visible="false"
         app:showAsAction="always" />
     <item android:id="@+id/clear_history"
         android:title="@string/clear_history"/>
-    <item android:id="@+id/update"
-        android:title="@string/update_base" />
-    <item android:id="@+id/add_translation"
-        android:title="@string/add_translation"/>
+    <item
+        android:id="@+id/add_translation"
+        android:title="@string/add_translation"
+        android:visible="false" />
     <item
         android:id="@+id/show_keyboard_checkbox"
         android:title="@string/show_additional_buttons"

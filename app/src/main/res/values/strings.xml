@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sandbox</string>
+    <string name="app_name">Russian-tatar dictionary</string>
     <string name="word">Word</string>
     <string name="translation">Translation</string>
     <string name="submit">Submit</string>
@@ -24,10 +24,14 @@
     <string name="no_search_result">Nothing found</string>
     <string name="no_translation">No translation</string>
     <string name="no_word">No word</string>
-    <string name="title_activity_testing">TestingActivity</string>
+    <string name="title_activity_testing" translatable="false">TestingActivity</string>
     <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="section_format" translatable="false">Hello World from section: %1$d</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <string name="history_cleared">History cleared</string>
+    <string name="tat_rus">tat-rus</string>
+    <string name="rus_tat">rus-tat</string>
+    <string name="examples_title">Examples:</string>
 </resources>

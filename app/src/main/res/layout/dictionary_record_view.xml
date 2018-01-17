@@ -12,16 +12,21 @@
 
     <TextView
         android:id="@+id/word"
-        android:textSize="16sp"
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:text="Word"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/translation"
-        android:layout_below="@id/word"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1" />
+        android:layout_below="@id/word"
+        android:lines="1"
+        android:text="Translation"
+        android:textSize="16sp"
+        android:textStyle="italic" />
 
 </RelativeLayout>

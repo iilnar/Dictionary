@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/translation_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.ilnar.sandbox.activities.MainActivity">
+    android:theme="@style/AppTheme"
+    tools:context=".activities.TranslationActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/translation_appbar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/appbar_padding_top"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintTop_creator="1">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/translation_toolbar"
@@ -26,19 +32,51 @@
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
+
     <TextView
+        android:id="@+id/word"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/translation"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="15dp"
         android:layout_marginTop="10dp"
-        android:textIsSelectable="true"
-        android:layout_marginStart="10dp"
-        android:layout_alignParentStart="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:layout_marginLeft="10dp"
-        android:layout_alignParentLeft="true" />
+        android:text="Word"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/translation_appbar" />
 
-</android.support.design.widget.CoordinatorLayout>
+    <TextView
+        android:id="@+id/translation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="8dp"
+        android:text="Translation"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toLeftOf="@+id/word"
+        app:layout_constraintTop_toBottomOf="@+id/word" />
+
+    <TextView
+        android:id="@+id/examples"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="8dp"
+        android:text="Examples"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@+id/translation"
+        app:layout_constraintTop_toBottomOf="@+id/examples_title" />
+
+    <TextView
+        android:id="@+id/examples_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/examples_title"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@+id/word"
+        app:layout_constraintTop_toBottomOf="@+id/translation" />
+
+</android.support.constraint.ConstraintLayout>

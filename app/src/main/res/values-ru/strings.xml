@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Sandbox</string>
+    <string name="app_name">Русско-татарский словарь</string>
     <string name="add_translation">Добавить новое слово</string>
     <string name="clear_history">Очистить историю</string>
     <string name="edit_translation">Исправить перевод</string>
@@ -19,4 +19,9 @@
     <string name="no_search_result">Ничего не найдено</string>
     <string name="no_translation">Перевод отсутствует</string>
     <string name="no_word">Нет слова</string>
+    <string name="history_cleared">История очищена</string>
+    <string name="action_settings">Настройки</string>
+    <string name="rus_tat">рус-тат</string>
+    <string name="tat_rus">тат-рус</string>
+    <string name="examples_title">Примеры:</string>
 </resources>
